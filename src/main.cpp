@@ -2,8 +2,8 @@
 #include "gl.h"
 #include "atlas_packer.h"
 
-uint WINDOW_W = 1280;
-uint WINDOW_H = 720;
+uint WINDOW_W = 256;
+uint WINDOW_H = 128;
 
 std::vector<gl::Texture> CollectImages(const std::string & folder)
 {
@@ -15,7 +15,8 @@ std::vector<gl::Texture> CollectImages(const std::string & folder)
     return std::move(textures);
 }
 
-std::vector<AtlasPacker::Atlas> PackageAtlas(const std::vector<gl::Texture> & textures)
+std::vector<AtlasPacker::Atlas> PackageAtlas(const std::vector<gl::Texture> & textures, 
+                                             uint align, uint space, uint offset)
 {
     std::vector<AtlasPacker::Item> items;
     for (const auto & texture : textures)
@@ -23,7 +24,7 @@ std::vector<AtlasPacker::Atlas> PackageAtlas(const std::vector<gl::Texture> & te
         items.emplace_back((void *)&texture, texture.mW, texture.mH);
     }
     AtlasPacker packer;
-    return packer.Package(items, 0, 1, 32);
+    return packer.Package(items, offset, space, align);
 }
 
 std::vector<gl::Texture> RenderToTextures(const std::vector<AtlasPacker::Atlas> & atlass)
@@ -110,22 +111,38 @@ void SaveToFile(const std::string & output, const std::vector<gl::Texture> & tex
 
 int main(int argv, char **argc)
 {
-    auto input  = "./res/1/";
-    auto output = "./output/";
-    if (gl::Begin(WINDOW_W, WINDOW_H, "PackAtlas"))
+    if (argv != 6)
     {
-        auto window = glfwGetCurrentContext();
-        std::cout << "Init: " << glfwGetTime() << std::endl;
-        auto textures = CollectImages(input);
-        std::cout << "Collect: " << glfwGetTime() << std::endl;
-        auto atlass = PackageAtlas(textures);
-        std::cout << "Package: " << glfwGetTime() << std::endl;
-        auto pngs = RenderToTextures(atlass);
-        std::cout << "Render: " << glfwGetTime() << std::endl;
-        SaveToFile(output, pngs);
-        std::cout << "Save: " << glfwGetTime() << std::endl;
-        gl::Ended();
+        std::cout << "参数: Output Input Align Space Offset." << std::endl;
     }
-    std::cin.get();
+    else
+    {
+        auto output = argc[1];
+        auto input  = argc[2];
+        auto align  = std::stoi(argc[3]);
+        auto space  = std::stoi(argc[4]);
+        auto offset = std::stoi(argc[5]);
+
+        //auto output = "./test/output/";
+        //auto input  = "./test/input/";
+        //auto align  = 32;
+        //auto space  = 1;
+        //auto offset = 0;
+
+        if (gl::Begin(WINDOW_W, WINDOW_H, "PackAtlas"))
+        {
+            std::cout << "> 加载图片..." << std::endl;
+            auto textures = CollectImages(input);
+            std::cout << "> 生成布局..." << std::endl;
+            auto atlass = PackageAtlas(textures, align, space, offset);
+            std::cout << "> 生成图集..." << std::endl;
+            auto pngs = RenderToTextures(atlass);
+            std::cout << "> 生成图片..." << std::endl;
+            SaveToFile(output, pngs);
+            std::cout << "> 执行完毕~~~" << std::endl;
+            gl::Ended();
+        }
+        std::cin.get();
+    }
     return 0;
 }

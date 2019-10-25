@@ -1,14 +1,13 @@
 #include "atlas_packer.h"
 
-const std::array<AtlasPacker::Limit, 8> AtlasPacker::LimitConfig{
+const std::array<AtlasPacker::Limit, 7> AtlasPacker::LimitConfig{
     Limit{256, 256, 1},
     Limit{512, 256, 1},
     Limit{512, 512, 3},
     Limit{1024, 512, 1},
     Limit{1024, 1024, 3},
     Limit{2048, 2048, 3},
-    Limit{4096, 4096, 1},
-    //Limit{6000, 4096, 666 },
+    Limit{4096, 4096, 666},
 };
 
 std::vector<AtlasPacker::Atlas> AtlasPacker::Package(Items & items, uint offset, uint space, uint align)

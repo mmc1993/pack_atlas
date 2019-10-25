@@ -112,7 +112,7 @@ public:
             : w(_w), h(_h), num(_num) { }
     };
 
-    static const std::array<Limit, 8> LimitConfig;
+    static const std::array<Limit, 7> LimitConfig;
 
     Atlass Package(Items & items, uint offset, uint space, uint align);
 
