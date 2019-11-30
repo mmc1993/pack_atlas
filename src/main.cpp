@@ -5,6 +5,49 @@
 uint WINDOW_W = 256;
 uint WINDOW_H = 128;
 
+const std::string VertCode = R"(
+#version 330 core
+
+layout(location = 0) in vec2 a_v_;
+layout(location = 1) in vec2 a_uv_;
+
+out V_OUT_ {
+    vec2 mUV;
+} v_out_;
+
+uniform mat4 matrix_proj;
+uniform mat4 matrix_view;
+uniform mat4 matrix_model;
+
+void main()
+{
+    v_out_.mUV   = a_uv_;
+    // gl_Position = vec4(a_v_, 0, 1);
+    gl_Position  = matrix_proj 
+                 * matrix_view 
+                 * matrix_model
+                 * vec4(a_v_, 0, 1);
+}
+)";
+
+const std::string FragCode = R"(
+#version 330 core
+
+in V_OUT_ {
+    vec2 mUV;
+} v_out_;
+
+uniform sampler2D texture_main;
+
+out vec4 color_;
+
+void main()
+{
+    color_ = texture(texture_main, v_out_.mUV);
+}
+)";
+
+
 std::vector<gl::Texture> CollectImages(const std::string & folder)
 {
     std::vector<gl::Texture> textures;
@@ -37,8 +80,10 @@ std::vector<gl::Texture> RenderToTextures(const std::vector<AtlasPacker::Atlas> 
 
     auto mesh = gl::CreateMesh({ }, { 0, 1, 2, 0, 2, 3 });
 
-    auto program = gl::CreateProgram("res/program/v.shader", 
-                                     "res/program/f.shader");
+    //auto program = gl::CreateProgram("res/program/v.shader", 
+    //                                 "res/program/f.shader");
+    auto program = gl::CreateProgram(VertCode.c_str(), VertCode.size(), 
+                                     FragCode.c_str(), FragCode.size());
 
     std::vector<gl::Texture> textures;
     for (auto & atlas : atlass)
@@ -111,23 +156,23 @@ void SaveToFile(const std::string & output, const std::vector<gl::Texture> & tex
 
 int main(int argv, char **argc)
 {
-    if (argv != 6)
+    //if (argv != 6)
     {
         std::cout << "参数: Output Input Align Space Offset." << std::endl;
     }
-    else
+    //else
     {
-        auto output = argc[1];
-        auto input  = argc[2];
-        auto align  = std::stoi(argc[3]);
-        auto space  = std::stoi(argc[4]);
-        auto offset = std::stoi(argc[5]);
+        //auto output = argc[1];
+        //auto input  = argc[2];
+        //auto align  = std::stoi(argc[3]);
+        //auto space  = std::stoi(argc[4]);
+        //auto offset = std::stoi(argc[5]);
 
-        //auto output = "./test/output/";
-        //auto input  = "./test/input/";
-        //auto align  = 32;
-        //auto space  = 1;
-        //auto offset = 0;
+        auto output = "C:/MyApp/2019_11_30(PngSplit)导出/word/o/";
+        auto input  = "C:/MyApp/2019_11_30(PngSplit)导出/word/";
+        auto align  = 4;
+        auto space  = 0;
+        auto offset = 0;
 
         if (gl::Begin(WINDOW_W, WINDOW_H, "PackAtlas"))
         {
